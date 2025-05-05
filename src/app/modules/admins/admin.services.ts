@@ -4,7 +4,7 @@ import { IAdmin } from "./admin.interface"
 import { Admin } from "./admin.model"
 import { IReqUser } from "../../global/globalType"
 import { JwtPayload } from "jsonwebtoken"
-import { uploadToCloudinary } from "../../helpers/fileUploader"
+// import { uploadToCloudinary } from "../../helpers/fileUploader"
 
 
 const createAdmin = async (data: IAdmin): Promise<IAdmin> => {
@@ -28,9 +28,9 @@ const createAdmin = async (data: IAdmin): Promise<IAdmin> => {
 const updateAdmin = async (user: any, file: any, data: Partial<IAdmin>) => {
 
     if (file) {
-        // data.profileImageUrl = `/uploads/${file.filename}`;
-        const uploadedImage: any = await uploadToCloudinary(file)
-        data.profileImageUrl = uploadedImage.secure_url
+        data.profileImageUrl = `/uploads/${file.filename}`;
+        // const uploadedImage: any = await uploadToCloudinary(file)
+        // data.profileImageUrl = uploadedImage.secure_url
     }
 
     const result = await Admin.findByIdAndUpdate(
