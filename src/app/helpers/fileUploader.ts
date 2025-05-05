@@ -30,8 +30,8 @@ const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(
       null,
-      '/web-development/Back End/shiloh-morfitter-backend/uploads',
-      // '/Office/shiloh-morfitter-backend/uploads',
+      '/server/morfitter-backend-deploy/uploads'
+      // '/web-development/Back End/shiloh-morfitter-backend/uploads',
     )
   },
   filename: function (req, file, cb) {
