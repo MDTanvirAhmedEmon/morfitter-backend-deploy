@@ -22,4 +22,7 @@ export interface ITrainingSession {
     membership_fee?: number;
     promo_image?: string;
     promo_video?: string;
+    zoomLink?: string;
+    meetingId?: string;
+    passcode?: string;
 }

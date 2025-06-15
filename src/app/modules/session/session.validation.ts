@@ -75,4 +75,8 @@ export const trainingSessionValidatedSchema = z.object({
     promo_image: z.string().url("Promo image must be a valid URL").optional(),
 
     promo_video: z.string().url("Promo video must be a valid URL").optional(),
+
+    zoomLink: z.string().url("Zoom Link must be a valid URL").optional(),
+    meetingId: z.string().url("Meeting Id must be a valid Id").optional(),
+    passcode: z.string().url("Passcode must be a valid Code").optional(),
 });
