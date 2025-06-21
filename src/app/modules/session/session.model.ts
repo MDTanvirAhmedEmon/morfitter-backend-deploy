@@ -27,6 +27,8 @@ const trainingSessionSchema: Schema<ITrainingSession> = new Schema({
     zoomLink: { type: String },
     meetingId: { type: String },
     passcode: { type: String },
+    startTime: { type: Date },
+    druration: { type: String },
 }, { timestamps: true });
 
 // Create the TrainingSession model

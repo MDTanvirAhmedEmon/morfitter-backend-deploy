@@ -25,4 +25,6 @@ export interface ITrainingSession {
     zoomLink?: string;
     meetingId?: string;
     passcode?: string;
+    startTime?: Date;
+    druration?: string;
 }
