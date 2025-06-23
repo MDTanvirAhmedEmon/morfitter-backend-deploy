@@ -39,6 +39,7 @@ const getAdminChats = async (req: Request, res: Response, next: NextFunction) =>
 const getAlUserWithIChats = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const currentUserId = req.params.id
+    console.log('from controller, current user id', currentUserId);
     const result = await messageServices.getAlUserWithIChats(currentUserId)
 
     res.status(200).json({
@@ -53,7 +54,7 @@ const getAlUserWithIChats = async (req: Request, res: Response, next: NextFuncti
 }
 
 export const chatsController = {
-    getUserChats,
-    getAdminChats,
-    getAlUserWithIChats,
+  getUserChats,
+  getAdminChats,
+  getAlUserWithIChats,
 }

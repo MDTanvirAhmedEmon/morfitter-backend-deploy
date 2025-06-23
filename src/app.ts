@@ -14,7 +14,7 @@ const app: Application = express()
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: ['https://morfitter-frontend.vercel.app', 'https://morfitter-frontend-six.vercel.app', 'http://localhost:3000','https://morfitter-frontend-2ri70yisw-thrajus-projects.vercel.app', 'https://morfitter-frontend-2ri70yisw-thrajus-projects.vercel.app', 'https://morfitter-frontend-nmovhie9i-thrajus-projects.vercel.app'],
+    origin: ['*','https://morfitter-frontend.vercel.app', 'https://morfitter-frontend-six.vercel.app', 'http://localhost:3000','https://morfitter-frontend-2ri70yisw-thrajus-projects.vercel.app', 'https://morfitter-frontend-2ri70yisw-thrajus-projects.vercel.app', 'https://morfitter-frontend-nmovhie9i-thrajus-projects.vercel.app'],
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -22,6 +22,7 @@ const io = new Server(httpServer, {
 
 initialChats(io)
 app.set("io",io)
+
 const corsOptions = {
   origin: ['https://morfitter-frontend.vercel.app', 'https://morfitter-frontend-six.vercel.app', 'http://localhost:3000','https://morfitter-frontend-2ri70yisw-thrajus-projects.vercel.app', 'https://morfitter-frontend-2ri70yisw-thrajus-projects.vercel.app', 'https://morfitter-frontend-nmovhie9i-thrajus-projects.vercel.app'], 
   credentials: true,

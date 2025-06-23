@@ -139,6 +139,7 @@ const getAdminChats = async (data: any) => {
 
 };
 const getAlUserWithIChats = async (currentUserId: string) => {
+    console.log('current user Id', currentUserId);
     try {
         const result = await Chats.aggregate([
             {
@@ -224,6 +225,7 @@ const getAlUserWithIChats = async (currentUserId: string) => {
             },
         ]);
 
+        console.log('result from getAlUserWithIChats', result);
         return result;
 
     } catch (error) {

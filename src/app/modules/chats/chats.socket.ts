@@ -10,10 +10,12 @@ const initialChats = (io: Server) => {
         //receive using on send using emit
         socket.on("sendUser", async (data) => {
             try {
+                console.log(data);
+  
                 const dbMessage = await messageServices.createMessage(data);
-                    console.log('after db',dbMessage);
+                console.log('after db', dbMessage);
                 if (dbMessage) {
-                    socket.emit(`received${dbMessage?.sender}`, dbMessage );
+                    socket.emit(`received${dbMessage?.sender}`, dbMessage);
                     socket.emit(`received${dbMessage?.receiver}`, dbMessage);
                 } else {
                     console.error("Message missing!");
