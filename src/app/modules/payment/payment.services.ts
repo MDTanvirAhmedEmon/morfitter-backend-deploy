@@ -1,111 +1,134 @@
-import AppError from "../../errors/AppError";
-import paypal from "paypal-rest-sdk";
+import Stripe from 'stripe';
+import config from '../../config';
+import { PurchaseAccess } from '../purchaseAccess/purchaseAccess.model';
+import { Trainer } from '../trainer/trainer.model';
+import AppError from '../../errors/AppError';
+
+const stripe = new Stripe(config.stripe_secret_key!, {
+    apiVersion: '2025-06-30.basil',
+});
+
+const webhookService = async (body: Buffer, sig: any, endpointSecret: string) => {
+    let event;
+
+    try {
+        event = stripe.webhooks.constructEvent(body, sig, endpointSecret);
+    } catch (err) {
+        // console.error('Webhook Error:', err.message);
+        // return res.status(400).send(`Webhook Error: ${err.message}`);
+        throw new AppError(400, "webhook Error")
+    }
+
+    if (event.type === 'checkout.session.completed') {
+        const session = event.data.object;
+        // const paymentIntentId = session.payment_intent;
+        // const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+        const purchase = await PurchaseAccess.findOneAndUpdate(
+            { purchase_session_id: session.id },
+            {
+                paymentStatus: 'paid',
+                // paymentDetails: { transactionId: paymentIntent.charges.data[0].id, },
+            }
+        );
+
+    }
+
+    return { received: true };
+}
+
+const generateOAuthLink = async () => {
+    try {
+        const accountLink = await stripe.accountLinks.create({
+            account: '', // Leave this empty when starting, Stripe will generate this after the trainer connects
+            refresh_url: 'https://morfitter.com',
+            return_url: 'https://morfitter.com/', // The URL to which Stripe will redirect after the trainer connects their account
+            type: 'account_onboarding',
+        });
+        return accountLink.url;
+    } catch (error) {
+        console.error('Error generating Stripe OAuth link:', error);
+        // throw new Error('Could not generate OAuth link');
+        throw new AppError(500, "Could not generate OAuth link");
+    }
+};
+
 
 const makePayment = async (data: any) => {
 
-    paypal.configure({
-        mode: "sandbox", // Change to 'sandbox' for testing. for production "live"
-        client_id: process.env.PAYPAL_CLIENT_ID!, // make sure to change this from config
-        client_secret: process.env.PAYPAL_SECRET!,
-    });
+    const { sessionPrice, trainerStripeId } = data;
 
-
-    const { trainerPaypalEmail, sessionPrice } = data;
-
-    // Calculate admin commission (10%) and trainer payout (90%)
-    const adminCommission = (sessionPrice * 0.10).toFixed(2);
-    const trainerPayout = (sessionPrice * 0.90).toFixed(2);
-
-    const create_payment_json:any = {
-        intent: "sale",
-        payer: {
-            payment_method: "paypal",
-        },
-        transactions: [
+    // Create a Stripe Checkout session
+    const session = await stripe.checkout.sessions.create({
+        payment_method_types: ['card'],
+        line_items: [
             {
-                amount: {
-                    total: sessionPrice.toFixed(2),
-                    currency: "USD",
+                price_data: {
+                    currency: 'gbp',
+                    product_data: {
+                        name: 'Trainer Session',
+                    },
+                    unit_amount: Math.floor(sessionPrice * 100),
                 },
-                payee: {
-                    email: process.env.ADMIN_PAYPAL_EMAIL, // Admin receives full amount first
-                },
-                description: "Payment for Trainer Session",
+                quantity: 1,
             },
         ],
-        redirect_urls: {
-            return_url: "http://yourdomain.com/api/paypal/success",
-            cancel_url: "http://yourdomain.com/api/paypal/cancel",
-        },
-    };
-
-    paypal.payment.create(create_payment_json, (error, payment) => {
-        if (error) {
-            throw new AppError(400, error.message)
-        } else {
-            const approvalUrl = payment.links?.find((link) => link.rel === "approval_url")?.href;
-            return { approvalUrl }
-        }
-    });
-}
-
-const executePayment = async (data: any) => {
-    const { paymentId, PayerID, trainerPaypalEmail, sessionPrice } = data;
-
-    const execute_payment_json = {
-        payer_id: PayerID,
-        transactions: [
-            {
-                amount: {
-                    total: sessionPrice.toFixed(2),
-                    currency: "USD",
-                },
+        mode: 'payment',
+        success_url: `/success?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `/cancel`,
+        payment_intent_data: {
+            application_fee_amount: Math.floor(sessionPrice * 0.1 * 100),
+            transfer_data: {
+                destination: trainerStripeId,
             },
-        ],
-    };
-
-    paypal.payment.execute(paymentId, execute_payment_json, async (error, payment) => {
-        if (error) {
-            throw new AppError(400, error.message)
-        } else {
-            // Trigger payout to trainer
-            await sendPayout(trainerPaypalEmail, (sessionPrice * 0.90).toFixed(2));
-            return { message: "Payment successful!" }
-        }
+        },
     });
+
+    await PurchaseAccess.create({
+        user_id: data?.userId,
+        session_id: data?.sessionId,
+        trainer_id: data?.trainerId,
+        purchase_session_id: session.id,
+        purchaseDate: new Date(),
+        paymentStatus: 'pending',
+        paymentDetails: { amountPaid: sessionPrice },
+        currency: 'gbp',
+    });
+
+    await Trainer.findByIdAndUpdate(
+        { _id: data?.trainerId },
+        { $inc: { earning: sessionPrice * 0.9 } }
+    );
+    return { url: session.url };
 };
 
-// Payout function to send 90% to the trainer
-const sendPayout = async (trainerPaypalEmail: any, amount: any) => {
-    const payoutJson = {
-        sender_batch_header: {
-            email_subject: "Trainer Payout",
-        },
-        items: [
+const createPayout = async (trainerStripeId: string, amount: number) => {
+    try {
+        // Calculate the amount in the smallest unit (e.g., cents for USD)
+        const amountInCents = Math.floor(amount * 100);
+
+        // Create a payout
+        const payout = await stripe.payouts.create(
             {
-                recipient_type: "EMAIL",
-                amount: {
-                    currency: "USD",
-                    value: amount,
-                },
-                receiver: trainerPaypalEmail,
+                amount: amountInCents, // Amount to payout (in cents)
+                currency: 'gbp', // Currency
             },
-        ],
-    };
+            {
+                stripeAccount: trainerStripeId, // The trainer's Stripe Connect account ID
+            }
+        );
 
-    paypal.payout.create(payoutJson, (error:any, payout:any) => {
-        if (error) {
-            console.error("Payout Error:", error);
-        } else {
-            console.log("Payout Successful:", payout);
-        }
-    });
+        console.log('Payout created successfully:', payout);
+        return payout;
+    } catch (error) {
+        console.error('Error creating payout:', error);
+        throw new Error('Failed to create payout');
+    }
 };
-
-
 
 
 export const paymentServices = {
+    webhookService,
+    generateOAuthLink,
     makePayment,
-    executePayment,
+    createPayout,
 };

@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { paymentController } from "./payment.controller";
-
 const router = Router();
 
+// router.post('/webhook', express.raw({ type: 'application/json' }), paymentController.webhookService)
 router.patch('/make-payment', paymentController.makePayment)
-router.patch('/execute-payment', paymentController.executePayment)
+router.post('/generate-oauth', paymentController.generateOAuthLink)
+router.post('/payout', paymentController.createPayout)
 
 // router.get('/:id', )
 

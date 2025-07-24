@@ -6,6 +6,7 @@ const purchaseAccessSchema: Schema<IPurchaseAccess> = new Schema({
     trainer_id: { type: Types.ObjectId, ref: "Trainer" },
     user_id: { type: Types.ObjectId, ref: "User" },
     purchaseDate: { type: Date, default: Date.now, required: true },
+    purchase_session_id: { type: String },
     paymentStatus: {
         type: String,
         enum: ["pending", "paid", "failed", "free"],
@@ -18,6 +19,7 @@ const purchaseAccessSchema: Schema<IPurchaseAccess> = new Schema({
         transactionId: { type: String, required: false },
         amountPaid: { type: Number, required: false },
     },
+    currency: { type: String },
 }, { timestamps: true });
 
 export const PurchaseAccess = model<IPurchaseAccess>("PurchaseAccess", purchaseAccessSchema);
