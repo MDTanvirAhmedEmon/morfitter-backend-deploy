@@ -21,7 +21,9 @@ const webhookService = async (req: Request, res: Response, next: NextFunction) =
 
 const generateOAuthLink = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const result = await paymentServices.generateOAuthLink();
+        const trainerId = req.query.id;
+        const email = req.query.email;
+        const result = await paymentServices.generateOAuthLink(trainerId, email as string);
 
         res.status(200).json({
             success: true,

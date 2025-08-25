@@ -114,6 +114,10 @@ export const trainerValidatedSchema = z.object({
         .string()
         .url("Twitter must be a valid URL")
         .optional(),
+    stripeAccountId: z
+        .string()
+        .url("stripe Account Id must be a string")
+        .optional(),
     user: z.custom<Types.ObjectId>((val) => Types.ObjectId.isValid(val), {
         message: 'Invalid user ID',
     }).optional(),

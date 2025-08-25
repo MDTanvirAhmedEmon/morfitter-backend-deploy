@@ -69,6 +69,7 @@ const trainerSchema = new Schema<ITrainer>(
     Facebook: { type: String },
     Youtube: { type: String },
     Twitter: { type: String },
+    stripeAccountId: { type: String },
     user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',

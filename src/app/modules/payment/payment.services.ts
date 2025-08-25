@@ -36,21 +36,37 @@ const webhookService = async (body: Buffer, sig: any, endpointSecret: string) =>
     return { received: true };
 }
 
-const generateOAuthLink = async () => {
+const generateOAuthLink = async (trainerId: any, email: string) => {
     try {
+        // Create an Express account
+        const account = await stripe.accounts.create({
+            type: 'standard',
+            country: 'GB',
+            email: email,
+        });
+
+        const trainer = await Trainer.findById({ _id: trainerId })
+        if (!trainer) {
+            throw new AppError(400, "Trainer not found!")
+        } else {
+            await Trainer.findByIdAndUpdate({ _id: trainerId }, { stripeAccountId: account.id })
+        }
+        // Create an onboarding link
         const accountLink = await stripe.accountLinks.create({
-            account: '', // Leave this empty when starting, Stripe will generate this after the trainer connects
+            account: account.id,
+            // account: '',
             refresh_url: 'https://morfitter.com',
-            return_url: 'https://morfitter.com/', // The URL to which Stripe will redirect after the trainer connects their account
+            return_url: 'https://morfitter.com',
             type: 'account_onboarding',
         });
+
         return accountLink.url;
     } catch (error) {
         console.error('Error generating Stripe OAuth link:', error);
-        // throw new Error('Could not generate OAuth link');
-        throw new AppError(500, "Could not generate OAuth link");
+        throw new AppError(500, error?.raw?.message);
     }
 };
+
 
 
 const makePayment = async (data: any) => {
