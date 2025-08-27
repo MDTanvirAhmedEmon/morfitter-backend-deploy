@@ -6,6 +6,9 @@ export interface IPurchaseAccess {
     trainer_id?: Types.ObjectId;
     purchaseDate: Date;
     purchase_session_id?: string;
+    totalAmount?: number;
+    trainerAmount?: number;
+    platformAmount?: number;
     paymentStatus: "pending" | "paid" | "failed" | "free";
     completedVideos: Types.ObjectId[]; // Track completed videos
     sessionCompleted?: boolean; // True when all videos are watched

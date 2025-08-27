@@ -21,7 +21,6 @@ const seedSuperAdmin = async () => {
 
     await Admin.create(superUser);
   }
-
 };
 
 export default seedSuperAdmin;

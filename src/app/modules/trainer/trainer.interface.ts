@@ -24,6 +24,6 @@ export interface ITrainer {
   Facebook?: string;
   Youtube?: string;
   Twitter?: string;
-  stripeAccountId: string;
+  stripeAccountId?: string;
   user?: Types.ObjectId;
 }

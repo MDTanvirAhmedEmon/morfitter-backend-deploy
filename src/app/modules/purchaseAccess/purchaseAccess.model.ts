@@ -7,6 +7,9 @@ const purchaseAccessSchema: Schema<IPurchaseAccess> = new Schema({
     user_id: { type: Types.ObjectId, ref: "User" },
     purchaseDate: { type: Date, default: Date.now, required: true },
     purchase_session_id: { type: String },
+    totalAmount: { type: Number },
+    trainerAmount: { type: Number },
+    platformAmount: { type: Number },
     paymentStatus: {
         type: String,
         enum: ["pending", "paid", "failed", "free"],

@@ -4,9 +4,15 @@ import { IPurchaseAccess } from "./purchaseAccess.interface"
 import { PurchaseAccess } from "./purchaseAccess.model";
 import mongoose from "mongoose";
 import { TrainingSession } from "../session/session.model";
+import { Trainer } from "../trainer/trainer.model";
+import Stripe from 'stripe';
+import config from "../../config";
 
+const stripe = new Stripe(config.stripe_secret_key!, {
+    apiVersion: '2025-06-30.basil',
+});
 
-const checkEnrollment = async (data: IPurchaseAccess): Promise<{ enrolled: boolean; result: IPurchaseAccess | null }>=> {
+const checkEnrollment = async (data: IPurchaseAccess): Promise<{ enrolled: boolean; result: IPurchaseAccess | null }> => {
 
     const result = await PurchaseAccess.findOne({
         session_id: data?.session_id,
@@ -19,25 +25,99 @@ const checkEnrollment = async (data: IPurchaseAccess): Promise<{ enrolled: boole
     };
 }
 
-const enrollNow = async (data: IPurchaseAccess): Promise<IPurchaseAccess> => {
-    const session = await TrainingSession.findOne({
-        _id: data?.session_id,
-    })
+const enrollNow = async (data: IPurchaseAccess): Promise<any> => {
+    //========================== For Free Sesssion =====================================
+    if (data.paymentStatus === 'free') {
+        const session = await TrainingSession.findOne({
+            _id: data?.session_id,
+        })
 
 
-    const isExist = await PurchaseAccess.findOne({
-        session_id: data?.session_id,
-        user_id: data?.user_id,
-    })
+        const isExist = await PurchaseAccess.findOne({
+            session_id: data?.session_id,
+            user_id: data?.user_id,
+        })
 
-    if (isExist) {
-        throw new AppError(400, "User already enrolled in this session");
+        if (isExist) {
+            throw new AppError(400, "User already enrolled in this session");
+        }
+        if (data) {
+            data.trainer_id = session?.trainer_id;
+        }
+        const result = await PurchaseAccess.create(data);
+        return result;
+    } else {
+        //========================== For Paid Sesssion =====================================
+        const isExist = await PurchaseAccess.findOne({
+            session_id: data?.session_id,
+            user_id: data?.user_id,
+        })
+
+        if (isExist) {
+            throw new AppError(400, "User already enrolled in this session");
+        }
+
+        const TrainerSession = await TrainingSession.findOne({
+            _id: data?.session_id,
+        })
+
+        if (!TrainerSession) {
+            throw new AppError(400, "session not found");
+        }
+        if (typeof TrainerSession.membership_fee !== "number") {
+            throw new AppError(400, "Session membership fee is not defined.");
+        }
+
+        const trainer = await Trainer.findById({ _id: TrainerSession?.trainer_id })
+        if (!trainer?.stripeAccountId) {
+            throw new AppError(400, "trainer did not connect his payment method");
+        }
+        // Create a Stripe Checkout session
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            line_items: [
+                {
+                    price_data: {
+                        currency: 'gbp',
+                        product_data: {
+                            name: TrainerSession?.title,
+                        },
+                        unit_amount: Math.floor(TrainerSession?.membership_fee * 100),
+                    },
+                    quantity: 1,
+                },
+            ],
+            mode: 'payment',
+            success_url: `/success?session_id={CHECKOUT_SESSION_ID}`,
+            cancel_url: `/cancel`,
+            payment_intent_data: {
+                application_fee_amount: Math.floor(TrainerSession?.membership_fee * 0.1 * 100),
+                transfer_data: {
+                    destination: trainer?.stripeAccountId,
+                },
+            },
+        });
+
+        await PurchaseAccess.create({
+            user_id: data?.user_id,
+            session_id: data?.session_id,
+            trainer_id: TrainerSession?.trainer_id,
+            purchase_session_id: session.id,
+            totalAmount: TrainerSession?.membership_fee,
+            trainerAmount: TrainerSession?.membership_fee * 0.9,
+            platformAmount: TrainerSession?.membership_fee * 0.1,
+            purchaseDate: new Date(),
+            paymentStatus: 'pending',
+            paymentDetails: { transactionId: session.id, amountPaid: TrainerSession?.membership_fee },
+            currency: 'gbp',
+        });
+
+        await Trainer.findByIdAndUpdate(
+            { _id: TrainerSession?.trainer_id },
+            { $inc: { earning: TrainerSession?.membership_fee * 0.9 } }
+        );
+        return { url: session.url };
     }
-    if (data) {
-        data.trainer_id = session?.trainer_id;
-    }
-    const result = await PurchaseAccess.create(data);
-    return result;
 }
 
 const myEnrolledSesion = async (data: JwtPayload | null) => {

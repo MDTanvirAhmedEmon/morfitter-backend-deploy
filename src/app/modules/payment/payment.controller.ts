@@ -21,7 +21,7 @@ const webhookService = async (req: Request, res: Response, next: NextFunction) =
 
 const generateOAuthLink = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const trainerId = req.query.id;
+        const trainerId = req.query.trainerId;
         const email = req.query.email;
         const result = await paymentServices.generateOAuthLink(trainerId, email as string);
 
@@ -36,22 +36,22 @@ const generateOAuthLink = async (req: Request, res: Response, next: NextFunction
     }
 }
 
-const makePayment = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const data = req.body
+// const makePayment = async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//         const data = req.body
 
-        const result = await paymentServices.makePayment(data);
+//         const result = await paymentServices.makePayment(data);
 
-        res.status(200).json({
-            success: true,
-            message: 'payment done successfully',
-            data: result,
-        })
-    }
-    catch (error) {
-        next(error)
-    }
-}
+//         res.status(200).json({
+//             success: true,
+//             message: 'payment done successfully',
+//             data: result,
+//         })
+//     }
+//     catch (error) {
+//         next(error)
+//     }
+// }
 
 const createPayout = async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -74,6 +74,5 @@ const createPayout = async (req: Request, res: Response, next: NextFunction) => 
 export const paymentController = {
     webhookService,
     generateOAuthLink,
-    makePayment,
     createPayout,
 }
