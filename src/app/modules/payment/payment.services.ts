@@ -45,18 +45,12 @@ const generateOAuthLink = async (trainerId: any, email: string) => {
             email: email,
         });
 
-        const trainer = await Trainer.findById({ _id: trainerId })
-        if (!trainer) {
-            throw new AppError(400, "Trainer not found!")
-        } else {
-            await Trainer.findByIdAndUpdate({ _id: trainerId }, { stripeAccountId: account.id })
-        }
         // Create an onboarding link
         const accountLink = await stripe.accountLinks.create({
             account: account.id,
             // account: '',
             refresh_url: 'https://morfitter.com',
-            return_url: 'https://morfitter.com',
+            return_url: `https://morfitter.com/onboarding-complete?trainerId=${trainerId}&accountId=${account.id}`,
             type: 'account_onboarding',
         });
 
@@ -67,6 +61,14 @@ const generateOAuthLink = async (trainerId: any, email: string) => {
         throw new AppError(500, "Something went wrong");
     }
 };
+
+const OnboardingComplete = async (trainerId: any, accountId: any) => {
+    if (!trainerId || !accountId) {
+        throw new AppError(400, "Missing trainerId or accountId");
+    }
+    const result = await Trainer.findByIdAndUpdate({ _id: trainerId }, { stripeAccountId: accountId })
+    return result;
+}
 
 
 const createPayout = async (trainerStripeId: string, amount: number) => {
@@ -97,5 +99,6 @@ const createPayout = async (trainerStripeId: string, amount: number) => {
 export const paymentServices = {
     webhookService,
     generateOAuthLink,
+    OnboardingComplete,
     createPayout,
 };
