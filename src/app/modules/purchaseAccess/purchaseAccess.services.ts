@@ -26,27 +26,7 @@ const checkEnrollment = async (data: IPurchaseAccess): Promise<{ enrolled: boole
 }
 
 const enrollNow = async (data: IPurchaseAccess): Promise<any> => {
-    //========================== For Free Sesssion =====================================
-    if (data.paymentStatus === 'free') {
-        const session = await TrainingSession.findOne({
-            _id: data?.session_id,
-        })
-
-
-        const isExist = await PurchaseAccess.findOne({
-            session_id: data?.session_id,
-            user_id: data?.user_id,
-        })
-
-        if (isExist) {
-            throw new AppError(400, "User already enrolled in this session");
-        }
-        if (data) {
-            data.trainer_id = session?.trainer_id;
-        }
-        const result = await PurchaseAccess.create(data);
-        return result;
-    } else {
+    if (data.paymentStatus === 'paid') {
         //========================== For Paid Sesssion =====================================
         const isExist = await PurchaseAccess.findOne({
             session_id: data?.session_id,
@@ -88,8 +68,8 @@ const enrollNow = async (data: IPurchaseAccess): Promise<any> => {
                 },
             ],
             mode: 'payment',
-            success_url: `/success?session_id={CHECKOUT_SESSION_ID}`,
-            cancel_url: `/cancel`,
+            success_url: `${config.stripe_payment_success_url}`,
+            cancel_url: `${config.stripe_payment_cancel_url}`,
             payment_intent_data: {
                 application_fee_amount: Math.floor(TrainerSession?.membership_fee * 0.1 * 100),
                 transfer_data: {
@@ -117,6 +97,26 @@ const enrollNow = async (data: IPurchaseAccess): Promise<any> => {
             { $inc: { earning: TrainerSession?.membership_fee * 0.9 } }
         );
         return { url: session.url };
+    } else {
+        //========================== For Free Sesssion =====================================
+        const session = await TrainingSession.findOne({
+            _id: data?.session_id,
+        })
+
+
+        const isExist = await PurchaseAccess.findOne({
+            session_id: data?.session_id,
+            user_id: data?.user_id,
+        })
+
+        if (isExist) {
+            throw new AppError(400, "User already enrolled in this session");
+        }
+        if (data) {
+            data.trainer_id = session?.trainer_id;
+        }
+        const result = await PurchaseAccess.create(data);
+        return result;
     }
 }
 

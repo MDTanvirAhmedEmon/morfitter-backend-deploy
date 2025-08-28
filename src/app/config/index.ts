@@ -18,4 +18,8 @@ export default {
   // admin_paypal_email: process.env.ADMIN_PAYPAL_EMAIL,
   stripe_secret_key: process.env.STRIPE_SECRET_KEY,
   stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
+  stripe_connect_account_return_url: process.env.STRIPE_CONNECT_ACCOUNT_RETURN_URL,
+  stripe_connect_account_refresh_url: process.env.STRIPE_CONNECT_ACCOUNT_REFRESH_URL,
+  stripe_payment_success_url: process.env.STRIPE_PAYMENT_SUCCESS_URL,
+  stripe_payment_cancel_url: process.env.STRIPE_PAYMENT_CANCEL_URL,
 }

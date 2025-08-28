@@ -53,16 +53,34 @@ const OnboardingComplete = async (req: Request, res: Response, next: NextFunctio
     }
 }
 
-const createPayout = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const { trainerStripeId, amount } = req.body
+// const createPayout = async (req: Request, res: Response, next: NextFunction) => {
+//     try {
+//         const { trainerStripeId, amount } = req.body
 
-        const result = await paymentServices.createPayout(trainerStripeId, amount);
+//         const result = await paymentServices.createPayout(trainerStripeId, amount);
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Payout done successfully',
+//             data: result,
+//         })
+//     }
+//     catch (error) {
+//         next(error)
+//     }
+// }
+
+
+const checkStripeConnectedOrNot = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { trainerId } = req.query
+
+        const result = await paymentServices.checkStripeConnectedOrNot(trainerId);
 
         res.status(200).json({
             success: true,
-            message: 'Payout done successfully',
-            data: result,
+            message: 'Checked Stripe Connected Or Not',
+            connection: result,
         })
     }
     catch (error) {
@@ -75,5 +93,6 @@ export const paymentController = {
     webhookService,
     generateOAuthLink,
     OnboardingComplete,
-    createPayout,
+    // createPayout,
+    checkStripeConnectedOrNot,
 }

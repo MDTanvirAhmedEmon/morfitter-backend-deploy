@@ -37,6 +37,12 @@ const webhookService = async (body: Buffer, sig: any, endpointSecret: string) =>
 }
 
 const generateOAuthLink = async (trainerId: any, email: string) => {
+    if(!trainerId){
+        throw new AppError(400, "Missing trainerId");
+    }
+    if(!email){
+        throw new AppError(400, "Missing email");
+    }
     try {
         // Create an Express account
         const account = await stripe.accounts.create({
@@ -49,8 +55,8 @@ const generateOAuthLink = async (trainerId: any, email: string) => {
         const accountLink = await stripe.accountLinks.create({
             account: account.id,
             // account: '',
-            refresh_url: 'https://morfitter.com',
-            return_url: `https://morfitter.com/onboarding-complete?trainerId=${trainerId}&accountId=${account.id}`,
+            refresh_url: `${config.stripe_connect_account_refresh_url}`,
+            return_url: `${config.stripe_connect_account_return_url}?trainerId=${trainerId}&accountId=${account.id}`,
             type: 'account_onboarding',
         });
 
@@ -71,27 +77,38 @@ const OnboardingComplete = async (trainerId: any, accountId: any) => {
 }
 
 
-const createPayout = async (trainerStripeId: string, amount: number) => {
-    try {
-        // Calculate the amount in the smallest unit (e.g., cents for USD)
-        const amountInCents = Math.floor(amount * 100);
+// const createPayout = async (trainerStripeId: string, amount: number) => {
+//     try {
+//         // Calculate the amount in the smallest unit (e.g., cents for USD)
+//         const amountInCents = Math.floor(amount * 100);
 
-        // Create a payout
-        const payout = await stripe.payouts.create(
-            {
-                amount: amountInCents, // Amount to payout (in cents)
-                currency: 'gbp', // Currency
-            },
-            {
-                stripeAccount: trainerStripeId, // The trainer's Stripe Connect account ID
-            }
-        );
+//         // Create a payout
+//         const payout = await stripe.payouts.create(
+//             {
+//                 amount: amountInCents, // Amount to payout (in cents)
+//                 currency: 'gbp', // Currency
+//             },
+//             {
+//                 stripeAccount: trainerStripeId, // The trainer's Stripe Connect account ID
+//             }
+//         );
 
-        console.log('Payout created successfully:', payout);
-        return payout;
-    } catch (error) {
-        console.error('Error creating payout:', error);
-        throw new Error('Failed to create payout');
+//         console.log('Payout created successfully:', payout);
+//         return payout;
+//     } catch (error) {
+//         console.error('Error creating payout:', error);
+//         throw new Error('Failed to create payout');
+//     }
+// };
+
+const checkStripeConnectedOrNot = async (trainerId: any) => {
+    const trainer = await Trainer.findById({_id: trainerId});
+    const trainerStripeId = trainer?.stripeAccountId;
+    if (!trainerStripeId) {
+        return false;
+    }
+    else{
+        return true;
     }
 };
 
@@ -100,5 +117,6 @@ export const paymentServices = {
     webhookService,
     generateOAuthLink,
     OnboardingComplete,
-    createPayout,
+    // createPayout,
+    checkStripeConnectedOrNot,
 };
