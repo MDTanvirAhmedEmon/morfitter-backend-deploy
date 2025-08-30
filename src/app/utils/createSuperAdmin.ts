@@ -8,7 +8,6 @@ const seedSuperAdmin = async () => {
 
   if (!isSuperAdminExits) {
     const hashedPassword = await bcrypt.hash("superAdmin777", Number(config.bcrypt_salt_rounds));
-
     const superUser = {
       firstName: "Super",
       lastName: "Admin",
