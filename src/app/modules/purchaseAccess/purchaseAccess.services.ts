@@ -404,6 +404,27 @@ const getAllPayments = async (
             }
         },
         {
+            $lookup: {
+                from: "trainingsessions",
+                localField: "session_id",
+                foreignField: "_id",
+                as: "session",
+                pipeline: [
+                    {
+                        $project: {
+                            title: 1,
+                        }
+                    }
+                ]
+            },
+        },
+        {
+            $unwind: {
+                path: "$session",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
             $sort: sortConditions,
         },
         {
@@ -427,6 +448,12 @@ const getAllPayments = async (
 };
 
 
+const updatePaymentStatus = async (paymentStatus: { paymentStatus: string }, id: any) => {
+    const result = await PurchaseAccess.findByIdAndUpdate({ _id: id }, { paymentStatus }, { new: true });
+    return result;
+};
+
+
 export const purchaseAccessServices = {
     checkEnrollment,
     enrollNow,
@@ -436,4 +463,5 @@ export const purchaseAccessServices = {
     myMemberships,
     markVideoAsComplete,
     getAllPayments,
+    updatePaymentStatus,
 }

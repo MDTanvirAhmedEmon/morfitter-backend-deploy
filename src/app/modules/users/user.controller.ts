@@ -161,11 +161,27 @@ const blockUnblock = async (req: Request, res: Response, next: NextFunction) => 
 //         next(error)
 //     }
 // }
-const checkUserNameAndEmail = async (req: Request, res: Response, next: NextFunction) => {
+const checkTraineeNameAndEmail = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { userName, email } = req.body
+        const { userName, email } = req.query
 
-        const result = await userServices.checkUserNameAndEmail(userName, email);
+        const result = await userServices.checkTraineeNameAndEmail(userName, email);
+
+        res.status(200).json({
+            success: true,
+            message: result,
+        })
+    }
+    catch (error) {
+        next(error)
+    }
+}
+
+const checkTrainerNameAndEmail = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { userName, email } = req.query
+
+        const result = await userServices.checkTrainerNameAndEmail(userName, email);
 
         res.status(200).json({
             success: true,
@@ -185,6 +201,7 @@ export const userController = {
     viewUser,
     newUser,
     blockUnblock,
-    checkUserNameAndEmail
+    checkTraineeNameAndEmail,
+    checkTrainerNameAndEmail
     // getMeTrainee,
 }

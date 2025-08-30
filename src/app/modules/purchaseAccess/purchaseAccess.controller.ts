@@ -144,6 +144,23 @@ const getAllPayments = async (req: Request, res: Response, next: NextFunction) =
     }
 }
 
+const updatePaymentStatus = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { paymentStatus, id } = req.body
+        console.log(req.body);
+
+        const result = await purchaseAccessServices.updatePaymentStatus(paymentStatus, id);
+
+        res.status(200).json({
+            success: true,
+            message: 'update payment status successfully',
+            data: result,
+        })
+    }
+    catch (error) {
+        next(error)
+    }
+}
 
 export const purchaseAccessController = {
     checkEnrollment,
@@ -154,4 +171,5 @@ export const purchaseAccessController = {
     myMemberships,
     markVideoAsComplete,
     getAllPayments,
+    updatePaymentStatus,
 }

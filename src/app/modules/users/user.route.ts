@@ -16,7 +16,8 @@ router.post('/create-trainee',
 router.post('/create-trainer', 
     upload.single('file'),
     userController.createTrainer)
-router.get('/check-availability', userController.checkUserNameAndEmail)
+router.get('/check-trainee-availability', userController.checkTraineeNameAndEmail)
+router.get('/check-trainer-availability', userController.checkTrainerNameAndEmail)
 router.get('/get-me', auth(), userController.getMe)
 router.get('/view-user/:id', auth(), userController.viewUser)
 router.get('/new-users', auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), userController.newUser)

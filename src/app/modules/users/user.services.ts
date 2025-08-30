@@ -324,8 +324,20 @@ const blockUnblock = async (id: string): Promise<any> => {
     }
 }
 
-const checkUserNameAndEmail = async (userName: any, email: any): Promise<any> => {
+const checkTraineeNameAndEmail = async (userName: any, email: any): Promise<any> => {
     const userNameExist = await Trainee.findOne({ userName: userName })
+    if (userNameExist) {
+        return { userName: 'User Name already exists!' }
+    }
+
+    const isExist = await User.findOne({ email: email })
+    if (isExist) {
+        return { email: 'email already exists!' }
+    }
+}
+
+const checkTrainerNameAndEmail = async (userName: any, email: any): Promise<any> => {
+    const userNameExist = await Trainer.findOne({ userName: userName })
     if (userNameExist) {
         return { userName: 'User Name already exists!' }
     }
@@ -344,6 +356,7 @@ export const userServices = {
     viewUser,
     newUser,
     blockUnblock,
-    checkUserNameAndEmail,
+    checkTraineeNameAndEmail,
+    checkTrainerNameAndEmail,
     // getMeTrainee,
 }
