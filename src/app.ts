@@ -11,7 +11,7 @@ import path from 'path';
 import { paymentController } from './app/modules/payment/payment.controller';
 
 const app: Application = express()
-router.post('/stripe/webhook', express.raw({ type: 'application/json' }), paymentController.webhookService)
+router.post('/api/v1/stripe/webhook', express.raw({ type: 'application/json' }), paymentController.webhookService)
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
