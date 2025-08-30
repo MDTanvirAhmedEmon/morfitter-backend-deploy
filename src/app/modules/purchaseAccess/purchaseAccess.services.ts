@@ -7,6 +7,9 @@ import { TrainingSession } from "../session/session.model";
 import { Trainer } from "../trainer/trainer.model";
 import Stripe from 'stripe';
 import config from "../../config";
+import { IPaginationOptions } from "../../global/globalType";
+import { paginationHelpers } from "../../helpers/pagination";
+import { Trainee } from "../trainee/trainee.model";
 
 const stripe = new Stripe(config.stripe_secret_key!, {
     apiVersion: '2025-06-30.basil',
@@ -49,8 +52,12 @@ const enrollNow = async (data: IPurchaseAccess): Promise<any> => {
         }
 
         const trainer = await Trainer.findById({ _id: TrainerSession?.trainer_id })
+        const trainee = await Trainee.findOne({ user: data?.user_id })
         if (!trainer?.stripeAccountId) {
             throw new AppError(400, "trainer did not connect his payment method");
+        }
+        if (!trainee) {
+            throw new AppError(400, "trainer does not exist");
         }
         // Create a Stripe Checkout session
         const session = await stripe.checkout.sessions.create({
@@ -82,6 +89,8 @@ const enrollNow = async (data: IPurchaseAccess): Promise<any> => {
             user_id: data?.user_id,
             session_id: data?.session_id,
             trainer_id: TrainerSession?.trainer_id,
+            trainerName: trainer?.firstName + ' ' + trainer?.lastName,
+            buyerName: trainee?.firstName + ' ' + trainee?.lastName,
             purchase_session_id: session.id,
             totalAmount: TrainerSession?.membership_fee,
             trainerAmount: TrainerSession?.membership_fee * 0.9,
@@ -112,6 +121,16 @@ const enrollNow = async (data: IPurchaseAccess): Promise<any> => {
         if (isExist) {
             throw new AppError(400, "User already enrolled in this session");
         }
+        const trainer = await Trainer.findById({ _id: session?.trainer_id })
+        const trainee = await Trainee.findOne({ user: data?.user_id })
+        if (!trainer) {
+            throw new AppError(400, "trainer does not exist");
+        }
+        if (!trainee) {
+            throw new AppError(400, "trainer does not exist");
+        }
+        data.trainerName = trainer?.firstName + ' ' + trainer?.lastName;
+        data.buyerName = trainee?.firstName + ' ' + trainee?.lastName;
         if (data) {
             data.trainer_id = session?.trainer_id;
         }
@@ -296,6 +315,117 @@ const markVideoAsComplete = async (data: any): Promise<IPurchaseAccess | null> =
 };
 
 
+const getAllPayments = async (
+    paginationOptions: IPaginationOptions,
+    searchTerm: any,
+) => {
+
+    const { limit, page, skip, sortBy, sortOrder } = paginationHelpers.calculatePagination(paginationOptions);
+
+
+    const andConditions = [];
+    const contentSearchableFields = ["buyerName", "trainerName", "paymentStatus"];
+
+    if (searchTerm) {
+        andConditions.push({
+            $or: contentSearchableFields.map((field) => ({
+                [field]: {
+                    $regex: searchTerm,
+                    $options: "i",
+                },
+            })),
+        });
+    }
+
+    // if (Object.keys(filtersData).length) {
+    //     andConditions.push({
+    //         $and: Object.entries(filtersData).map(([field, value]) => ({
+    //             [field]: value,
+    //         })),
+    //     });
+    // }
+
+    const sortConditions: { [key: string]: 1 | -1 } = {};
+    if (sortBy && sortOrder) {
+        sortConditions[sortBy] = sortOrder === 'asc' || sortOrder === 'ascending' ? 1 : -1;
+    }
+
+    const whereConditions = andConditions.length > 0 ? { $and: andConditions } : {};
+
+    const result = await PurchaseAccess.aggregate([
+        {
+            $match: whereConditions
+        },
+        {
+            $lookup: {
+                from: "trainers",
+                localField: "trainer_id",
+                foreignField: "_id",
+                as: "trainer",
+                pipeline: [
+                    {
+                        $project: {
+                            firstName: 1,
+                            lastName: 1,
+                            profileImageUrl: 1
+                        }
+                    }
+                ]
+            },
+        },
+        {
+            $unwind: {
+                path: "$trainer",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $lookup: {
+                from: "trainees",
+                localField: "user_id",
+                foreignField: "user",
+                as: "buyer",
+                pipeline: [
+                    {
+                        $project: {
+                            firstName: 1,
+                            lastName: 1,
+                            profileImageUrl: 1
+                        }
+                    }
+                ]
+            },
+        },
+        {
+            $unwind: {
+                path: "$buyer",
+                preserveNullAndEmptyArrays: true
+            }
+        },
+        {
+            $sort: sortConditions,
+        },
+        {
+            $skip: skip,
+        },
+        {
+            $limit: limit,
+        },
+    ]);
+
+    const total = await PurchaseAccess.countDocuments(whereConditions);
+
+    return {
+        meta: {
+            page,
+            limit,
+            total,
+        },
+        data: result,
+    };
+};
+
+
 export const purchaseAccessServices = {
     checkEnrollment,
     enrollNow,
@@ -304,4 +434,5 @@ export const purchaseAccessServices = {
     getTotalEnrollmentForTrainer,
     myMemberships,
     markVideoAsComplete,
+    getAllPayments,
 }

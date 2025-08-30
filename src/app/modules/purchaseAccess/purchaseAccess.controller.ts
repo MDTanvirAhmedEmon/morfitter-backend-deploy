@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import { purchaseAccessServices } from "./purchaseAccess.services";
+import { IPaginationOptions } from "../../global/globalType";
 
 
 const checkEnrollment = async (req: Request, res: Response, next: NextFunction) => {
@@ -120,6 +121,29 @@ const markVideoAsComplete = async (req: Request, res: Response, next: NextFuncti
     }
 }
 
+const getAllPayments = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const { limit, page, sortBy, sortOrder, searchTerm } = req.query;
+
+        const paginationOptions: IPaginationOptions = {
+            limit: Number(limit) || 10,
+            page: Number(page) || 1,
+            sortBy: sortBy?.toString() || 'createdAt',
+            sortOrder: sortOrder?.toString() === 'desc' ? 'desc' : 'asc',
+        };
+        const result = await purchaseAccessServices.getAllPayments(paginationOptions, searchTerm);
+
+        res.status(200).json({
+            success: true,
+            message: 'get all payments successfully',
+            data: result,
+        })
+    }
+    catch (error) {
+        next(error)
+    }
+}
+
 
 export const purchaseAccessController = {
     checkEnrollment,
@@ -129,4 +153,5 @@ export const purchaseAccessController = {
     getTotalEnrollmentForTrainer,
     myMemberships,
     markVideoAsComplete,
+    getAllPayments,
 }

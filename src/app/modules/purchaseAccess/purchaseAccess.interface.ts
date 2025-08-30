@@ -4,6 +4,8 @@ export interface IPurchaseAccess {
     session_id?: Types.ObjectId;
     user_id?: Types.ObjectId;
     trainer_id?: Types.ObjectId;
+    trainerName?: string;
+    buyerName?: string;
     purchaseDate: Date;
     purchase_session_id?: string;
     totalAmount?: number;
