@@ -8,8 +8,10 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import initialChats from './app/modules/chats/chats.socket';
 import path from 'path';
-const app: Application = express()
+import { paymentController } from './app/modules/payment/payment.controller';
 
+const app: Application = express()
+router.post('/stripe/webhook', express.raw({ type: 'application/json' }), paymentController.webhookService)
 
 const httpServer = createServer(app);
 const io = new Server(httpServer, {

@@ -18,7 +18,7 @@ import { PolicyAndTemrmsRouter } from "../modules/policyAndTerms/policyAndTerms.
 import { PurchaseAccessRouter } from "../modules/purchaseAccess/purchaseAccess.route";
 import { SessionReviewRouter } from "../modules/sessinReview/sessinReview.route";
 import { PaymentRouter } from "../modules/payment/payment.route";
-import { WebHookRouter } from "../modules/payment/webhook.route";
+// import { WebHookRouter } from "../modules/payment/webhook.route";
 
 const router = Router();
 
@@ -99,10 +99,10 @@ const moduleRoutes = [
         path: '/payment',
         route: PaymentRouter,
     },
-    {
-        path: '/stripe',
-        route: WebHookRouter,
-    },
+    // {
+    //     path: '/stripe',
+    //     route: WebHookRouter,
+    // },
 ];
 
 moduleRoutes.forEach((route) => router.use(route.path, route.route));
