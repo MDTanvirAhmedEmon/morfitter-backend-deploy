@@ -11,7 +11,7 @@ const webhookService = async (req: Request, res: Response, next: NextFunction) =
 
         res.status(200).json({
             success: true,
-            message: 'webhook successful',
+            message: 'webhook successfully',
             result,
         });
     } catch (error) {

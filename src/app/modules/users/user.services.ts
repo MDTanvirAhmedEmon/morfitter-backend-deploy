@@ -324,6 +324,18 @@ const blockUnblock = async (id: string): Promise<any> => {
     }
 }
 
+const checkUserNameAndEmail = async (userName: any, email: any): Promise<any> => {
+    const userNameExist = await Trainee.findOne({ userName: userName })
+    if (userNameExist) {
+        return { userName: 'User Name already exists!' }
+    }
+
+    const isExist = await User.findOne({ email: email })
+    if (isExist) {
+        return { email: 'email already exists!' }
+    }
+}
+
 
 export const userServices = {
     createTrainee,
@@ -332,5 +344,6 @@ export const userServices = {
     viewUser,
     newUser,
     blockUnblock,
+    checkUserNameAndEmail,
     // getMeTrainee,
 }
