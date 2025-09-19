@@ -11,6 +11,8 @@ router.patch('/policy/:id', auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMI
 router.post('/create-terms',  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), policyAndTemrmsController.createTerm)
 router.get('/terms', policyAndTemrmsController.getTerm)
 router.patch('/terms/:id', auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),policyAndTemrmsController.updateTerm)
+router.get('/social', policyAndTemrmsController.getSocial)
+router.patch('/social', auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),policyAndTemrmsController.createUpdateSocial)
 
 
 export const PolicyAndTemrmsRouter = router;

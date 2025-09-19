@@ -16,7 +16,7 @@ router.post('/api/v1/stripe/webhook', express.raw({ type: 'application/json' }),
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: {
-    origin: ['*','https://morfitter.com', 'https://morfitter-frontend-six.vercel.app', 'http://localhost:3000','https://morfitter-frontend-2ri70yisw-thrajus-projects.vercel.app', 'https://morfitter-frontend-2ri70yisw-thrajus-projects.vercel.app', 'https://morfitter-frontend-nmovhie9i-thrajus-projects.vercel.app'],
+    origin: ['*','https://morfitter.com', 'http://localhost:3000'],
     methods: ['GET', 'POST'],
     credentials: true
   }
@@ -26,7 +26,7 @@ initialChats(io)
 app.set("io",io)
 
 const corsOptions = {
-  origin: ['https://morfitter.com', 'https://morfitter-frontend-six.vercel.app', 'http://localhost:3000','https://morfitter-frontend-2ri70yisw-thrajus-projects.vercel.app', 'https://morfitter-frontend-2ri70yisw-thrajus-projects.vercel.app', 'https://morfitter-frontend-nmovhie9i-thrajus-projects.vercel.app'], 
+  origin: ['https://morfitter.com', 'http://localhost:3000'], 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
   // allowedHeaders: ['Content-Type', 'Authorization'],

@@ -105,6 +105,38 @@ const updateTerm = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const createUpdateSocial = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const data = req.body
+        console.log(data);
+        const result = await policyAndTemrmsServices.createUpdateSocial(data);
+
+        res.status(200).json({
+            success: true,
+            message: 'update terms successfully',
+            data: result,
+        })
+    }
+    catch (error) {
+        next(error)
+    }
+}
+
+const getSocial = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const result = await policyAndTemrmsServices.getSocial();
+
+        res.status(200).json({
+            success: true,
+            message: 'get all social links successfully',
+            data: result,
+        })
+    }
+    catch (error) {
+        next(error)
+    }
+}
+
 export const policyAndTemrmsController = {
     createPolicy,
     getPolicy,
@@ -112,5 +144,6 @@ export const policyAndTemrmsController = {
     createTerm,
     getTerm,
     updateTerm,
-
+    createUpdateSocial,
+    getSocial
 }

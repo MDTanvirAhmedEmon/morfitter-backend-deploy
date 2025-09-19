@@ -23,8 +23,9 @@ const checkEnrollment = async (req: Request, res: Response, next: NextFunction) 
 const enrollNow = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const data = req.body
+        const user = req.user
 
-        const result = await purchaseAccessServices.enrollNow(data);
+        const result = await purchaseAccessServices.enrollNow(data, user);
 
         res.status(200).json({
             success: true,
@@ -40,6 +41,7 @@ const enrollNow = async (req: Request, res: Response, next: NextFunction) => {
 const myEnrolledSesion = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const data = req.user
+        
         const result = await purchaseAccessServices.myEnrolledSesion(data);
 
         res.status(200).json({

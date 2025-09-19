@@ -6,6 +6,7 @@ const createContent = async (req: Request, res: Response, next: NextFunction) =>
     try {
         const file = req.file
         const user = req.user
+        console.log(user);
         const data = JSON.parse(req.body.data)
         const content = contentValidatedSchema.parse(data)
         // console.log('file',file);

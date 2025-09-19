@@ -10,6 +10,7 @@ import config from "../../config";
 import { IPaginationOptions } from "../../global/globalType";
 import { paginationHelpers } from "../../helpers/pagination";
 import { Trainee } from "../trainee/trainee.model";
+import { User } from "../users/user.model";
 
 const stripe = new Stripe(config.stripe_secret_key!, {
     apiVersion: '2025-06-30.basil',
@@ -28,13 +29,20 @@ const checkEnrollment = async (data: IPurchaseAccess): Promise<{ enrolled: boole
     };
 }
 
-const enrollNow = async (data: IPurchaseAccess): Promise<any> => {
+const enrollNow = async (data: IPurchaseAccess, user: any): Promise<any> => {
+
     if (data.paymentStatus === 'paid') {
         //========================== For Paid Sesssion =====================================
         const isExist = await PurchaseAccess.findOne({
             session_id: data?.session_id,
             user_id: data?.user_id,
         })
+
+        const isTrainer = await User.findById({ _id: user?.id })
+
+        if (isTrainer?.role === "trainer") {
+            throw new AppError(400, "Trainers cannot enroll in sessions");
+        }
 
         if (isExist) {
             throw new AppError(400, "User already enrolled in this session");

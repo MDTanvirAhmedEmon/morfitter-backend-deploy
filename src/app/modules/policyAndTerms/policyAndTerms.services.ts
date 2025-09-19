@@ -1,11 +1,11 @@
 import AppError from "../../errors/AppError";
-import { IPolicy, ITerms } from "./policyAndTerms.interface"
-import { Policy, Terms } from "./policyAndTerms.model"
+import { IPolicy, ISocialLinks, ITerms } from "./policyAndTerms.interface"
+import { Policy, SocialLinks, Terms } from "./policyAndTerms.model"
 
 
-const createPolicy = async ( data: IPolicy ): Promise<IPolicy | null> => {
+const createPolicy = async (data: IPolicy): Promise<IPolicy | null> => {
     const isExist = await Policy.find();
-    if(isExist.length > 0) {
+    if (isExist.length > 0) {
         throw new AppError(400, 'already have a privacy policy')
     }
     const result = await Policy.create(data)
@@ -27,10 +27,10 @@ const updatePolicy = async (id: string, data: Partial<IPolicy>): Promise<IPolicy
     return result
 }
 
-const createTerm = async ( data: ITerms ): Promise<ITerms | null> => {
+const createTerm = async (data: ITerms): Promise<ITerms | null> => {
     const isExist = await Terms.find();
     console.log(isExist);
-    if(isExist.length > 0) {
+    if (isExist.length > 0) {
         throw new AppError(400, 'already have a terms and condition')
     }
     const result = await Terms.create(data)
@@ -52,6 +52,34 @@ const updateTerm = async (id: string, data: Partial<ITerms>): Promise<ITerms | n
     return result
 }
 
+const createUpdateSocial = async (data: Partial<ISocialLinks>): Promise<ISocialLinks | null> => {
+    const existing = await SocialLinks.findOne();
+
+    if (!existing) {
+        const created = await SocialLinks.create(data);
+        return created;
+    }
+
+    const updated = await SocialLinks.findByIdAndUpdate(
+        existing._id,
+        { $set: data },
+        { new: true }
+    );
+
+    if (!updated) {
+        throw new AppError(500, "Failed to update SocialLinks");
+    }
+
+    return updated;
+}
+
+const getSocial = async (): Promise<ISocialLinks[]> => {
+
+    const result = await SocialLinks.find();
+
+    return result
+}
+
 export const policyAndTemrmsServices = {
     createPolicy,
     createTerm,
@@ -59,4 +87,6 @@ export const policyAndTemrmsServices = {
     updatePolicy,
     getTerm,
     updateTerm,
+    createUpdateSocial,
+    getSocial,
 }

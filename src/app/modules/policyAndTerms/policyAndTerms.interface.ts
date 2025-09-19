@@ -5,3 +5,10 @@ export interface IPolicy {
 export interface ITerms {
     term: string
 }
+
+export interface ISocialLinks {
+    facebook: string,
+    instagram: string,
+    x: string,
+    linkedin: string,
+}
