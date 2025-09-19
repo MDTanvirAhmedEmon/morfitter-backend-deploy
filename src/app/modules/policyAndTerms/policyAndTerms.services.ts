@@ -1,6 +1,6 @@
 import AppError from "../../errors/AppError";
-import { IHelpCenter, IPolicy, ISocialLinks, ITerms } from "./policyAndTerms.interface"
-import { HelpCenter, Policy, SocialLinks, Terms } from "./policyAndTerms.model"
+import { IHelpCenter, IPolicy, ISocialLinks, ISubscription, ITerms } from "./policyAndTerms.interface"
+import { HelpCenter, Policy, SocialLinks, Subscription, Terms } from "./policyAndTerms.model"
 
 
 const createPolicy = async (data: IPolicy): Promise<IPolicy | null> => {
@@ -111,6 +111,36 @@ const getHelpCenter = async (meta: any) => {
     return { helpCenters, total, totalPages };
 }
 
+const subscrip = async (data: Partial<ISubscription>): Promise<ISubscription | null> => {
+    const created = await Subscription.create(data);
+    return created;
+}
+
+const getSubscrip = async (meta: any) => {
+    const { page, limit = 10 } = meta;
+    const skip = (page - 1) * limit;
+
+    const searchFilter = meta.searchQuery
+        ? {
+            $or: [
+                { name: { $regex: meta.searchQuery, $options: 'i' } },
+                { email: { $regex: meta.searchQuery, $options: 'i' } },
+                { issue: { $regex: meta.searchQuery, $options: 'i' } },
+            ]
+        }
+        : {};
+
+    const total = await Subscription.countDocuments(searchFilter);
+
+    const Subscriptions = await Subscription.find(searchFilter)
+        .skip(skip)
+        .limit(limit);
+
+    const totalPages = Math.ceil(total / limit);
+
+    return { Subscriptions, total, totalPages };
+}
+
 
 export const policyAndTemrmsServices = {
     createPolicy,
@@ -122,5 +152,7 @@ export const policyAndTemrmsServices = {
     createUpdateSocial,
     getSocial,
     postHelpCenter,
-    getHelpCenter
+    getHelpCenter,
+    getSubscrip,
+    subscrip
 }

@@ -15,6 +15,8 @@ router.get('/social', policyAndTemrmsController.getSocial)
 router.patch('/social', auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), policyAndTemrmsController.createUpdateSocial)
 router.get('/help-center', policyAndTemrmsController.getHelpCenter)
 router.patch('/help-center', policyAndTemrmsController.postHelpCenter)
+router.get('/subscription', policyAndTemrmsController.getSubscrip)
+router.patch('/subscription', policyAndTemrmsController.subscrip)
 
 
 export const PolicyAndTemrmsRouter = router;

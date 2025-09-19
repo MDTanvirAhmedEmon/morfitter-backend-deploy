@@ -169,6 +169,38 @@ const getHelpCenter = async (req: Request, res: Response, next: NextFunction) =>
     }
 }
 
+const subscrip = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const data = req.body
+        const result = await policyAndTemrmsServices.subscrip(data);
+
+        res.status(200).json({
+            success: true,
+            message: 'subscription successfully',
+            data: result,
+        })
+    }
+    catch (error) {
+        next(error)
+    }
+}
+
+const getSubscrip = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const meta = req.query
+        const result = await policyAndTemrmsServices.getSubscrip(meta);
+
+        res.status(200).json({
+            success: true,
+            message: 'get all subscriptions successfully',
+            data: result,
+        })
+    }
+    catch (error) {
+        next(error)
+    }
+}
+
 export const policyAndTemrmsController = {
     createPolicy,
     getPolicy,
@@ -180,4 +212,6 @@ export const policyAndTemrmsController = {
     getSocial,
     postHelpCenter,
     getHelpCenter,
+    subscrip,
+    getSubscrip,
 }
