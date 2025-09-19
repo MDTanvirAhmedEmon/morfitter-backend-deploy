@@ -137,6 +137,38 @@ const getSocial = async (req: Request, res: Response, next: NextFunction) => {
     }
 }
 
+const postHelpCenter = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const data = req.body
+        const result = await policyAndTemrmsServices.postHelpCenter(data);
+
+        res.status(200).json({
+            success: true,
+            message: 'posted help center successfully',
+            data: result,
+        })
+    }
+    catch (error) {
+        next(error)
+    }
+}
+
+const getHelpCenter = async (req: Request, res: Response, next: NextFunction) => {
+    try {
+        const meta = req.query
+        const result = await policyAndTemrmsServices.getHelpCenter(meta);
+
+        res.status(200).json({
+            success: true,
+            message: 'get all issues successfully',
+            data: result,
+        })
+    }
+    catch (error) {
+        next(error)
+    }
+}
+
 export const policyAndTemrmsController = {
     createPolicy,
     getPolicy,
@@ -145,5 +177,7 @@ export const policyAndTemrmsController = {
     getTerm,
     updateTerm,
     createUpdateSocial,
-    getSocial
+    getSocial,
+    postHelpCenter,
+    getHelpCenter,
 }

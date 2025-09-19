@@ -1,5 +1,5 @@
 import { Schema, model } from "mongoose";
-import { IPolicy, ISocialLinks, ITerms } from "./policyAndTerms.interface";
+import { IHelpCenter, IPolicy, ISocialLinks, ISubscription, ITerms } from "./policyAndTerms.interface";
 
 
 const policySchema: Schema<IPolicy> = new Schema({
@@ -27,3 +27,20 @@ const socialLinksSchema = new Schema<ISocialLinks>({
 
 
 export const SocialLinks = model<ISocialLinks>("SocialLinks", socialLinksSchema);
+
+const helpCenterSchema = new Schema<IHelpCenter>({
+    name: { type: String, required: true },
+    email: { type: String, required: true },
+    issue: { type: String, required: true },
+}, { timestamps: true });
+
+
+export const HelpCenter = model<IHelpCenter>("HelpCenter", helpCenterSchema);
+
+
+const subscriptionSchema = new Schema<ISubscription>({
+    email: { type: String, required: true },
+}, { timestamps: true });
+
+
+export const Subscription = model<ISubscription>("Subscription", subscriptionSchema);
