@@ -123,9 +123,7 @@ const getSubscrip = async (meta: any) => {
     const searchFilter = meta.searchQuery
         ? {
             $or: [
-                { name: { $regex: meta.searchQuery, $options: 'i' } },
                 { email: { $regex: meta.searchQuery, $options: 'i' } },
-                { issue: { $regex: meta.searchQuery, $options: 'i' } },
             ]
         }
         : {};
