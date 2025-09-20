@@ -112,6 +112,10 @@ const getHelpCenter = async (meta: any) => {
 }
 
 const subscrip = async (data: Partial<ISubscription>): Promise<ISubscription | null> => {
+    const isSubscribe = await Subscription.findOne({email: data?.email})
+    if(isSubscribe){
+        throw new AppError(400, "Already Subscribe!")
+    }
     const created = await Subscription.create(data);
     return created;
 }

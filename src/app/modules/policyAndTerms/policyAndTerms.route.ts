@@ -13,10 +13,10 @@ router.get('/terms', policyAndTemrmsController.getTerm)
 router.patch('/terms/:id', auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), policyAndTemrmsController.updateTerm)
 router.get('/social', policyAndTemrmsController.getSocial)
 router.patch('/social', auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), policyAndTemrmsController.createUpdateSocial)
-router.get('/help-center', policyAndTemrmsController.getHelpCenter)
-router.patch('/help-center', policyAndTemrmsController.postHelpCenter)
-router.get('/subscription', policyAndTemrmsController.getSubscrip)
-router.patch('/subscription', policyAndTemrmsController.subscrip)
+router.get('/help-center', auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), policyAndTemrmsController.getHelpCenter)
+router.post('/help-center', policyAndTemrmsController.postHelpCenter)
+router.get('/subscription', auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN), policyAndTemrmsController.getSubscrip)
+router.post('/subscription', policyAndTemrmsController.subscrip)
 
 
 export const PolicyAndTemrmsRouter = router;

@@ -30,6 +30,7 @@ export const SocialLinks = model<ISocialLinks>("SocialLinks", socialLinksSchema)
 
 const helpCenterSchema = new Schema<IHelpCenter>({
     name: { type: String, required: true },
+    phone: { type: Number, required: true },
     email: { type: String, required: true },
     issue: { type: String, required: true },
 }, { timestamps: true });

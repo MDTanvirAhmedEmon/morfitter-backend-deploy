@@ -15,6 +15,7 @@ export interface ISocialLinks {
 
 export interface IHelpCenter {
     name: string,
+    phone: number,
     email: string,
     issue: string,
 }
